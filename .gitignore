@@ -1,0 +1,8 @@
+# Library files
+libs/
+
+# Think later about this.
+*.svg
+*.doc.js
+*.doc.json
+*.doc.css

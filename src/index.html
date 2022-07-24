@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Task tracking app</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <link rel="stylesheet" href="./css/style.css">
+   <script src="../libs/knockout/knockout.debug.js"></script>
+   <script src="../libs/knockout/knockout.mapping.min.js"></script>
+</head>
+<body>
+
+   <!-- header -->
+   <header class="site-header">
+      <div class="site-header-item-group">
+         <button class="site-nav-toggle-button" data-bind="openSideNav: openSideNav">
+            <svg xmlns="http://www.w3.org/2000/svg" id="svg-menu-bar" class="svg-icon" viewBox="0 0 24 24" width="512" height="512">
+               <rect y="11" width="24" height="2" rx="1" />
+               <rect y="4" width="24" height="2" rx="1" />
+               <rect y="18" width="24" height="2" rx="1" />
+            </svg>
+         </button>
+         <h1 class="site-title">Task Tracker</h1>
+      </div>
+      <div class="site-header__search">
+         <input type="text" class="site-header__search-bar">
+         <!-- <svg xmlns="http://www.w3.org/2000/svg" id="svg-search" class="svg-icon site-header__search-icon" viewBox="0 0 24 24" width="512" height="512">
+            <path d="M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z" />
+         </svg> -->
+         <i class="fa-solid fa-magnifying-glass site-header__search-icon"></i>
+      </div>
+   </header>
+
+   <nav class="site-nav" id="site-side-nav" data-bind="controlSideNavVisibility: isSideNavVisible">
+      <ul class="site-nav__menu">
+         <li class="site-nav__menu-item">
+            <button class="site-nav__menu-button active">
+               <svg id="svg-check-list" class="svg-icon" height="512" viewBox="0 0 24 24" width="512" xmlns="http://www.w3.org/2000/svg" data-name="svg-check-list">
+                  <path d="m4 6a2.982 2.982 0 0 1 -2.122-.879l-1.585-1.585 1.414-1.414 1.586 1.585a1.023 1.023 0 0 0 1.414 0l3.586-3.585 1.414 1.414-3.586 3.585a2.978 2.978 0 0 1 -2.121.879zm20-3h-12v2h12zm-17.879 10.121 3.586-3.585-1.414-1.414-3.586 3.585a1.023 1.023 0 0 1 -1.414 0l-1.586-1.585-1.414 1.414 1.585 1.585a3 3 0 0 0 4.243 0zm17.879-2.121h-12v2h12zm-17.879 10.121 3.586-3.585-1.414-1.414-3.586 3.585a1.023 1.023 0 0 1 -1.414 0l-1.586-1.585-1.414 1.414 1.585 1.585a3 3 0 0 0 4.243 0zm17.879-2.121h-12v2h12z" />
+               </svg>
+               Tasks
+            </button>
+         </li>
+         <li class="site-nav__menu-item">
+            <button class="site-nav__menu-button">
+               <svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" viewBox="0 0 24 24" width="512" height="512">
+                  <g id="_01_align_center" data-name="01 align center">
+                     <path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" />
+                     <rect x="9" y="10" width="2" height="8" />
+                     <rect x="13" y="10" width="2" height="8" />
+                  </g>
+               </svg>
+               Trash
+            </button>
+         </li>
+      </ul>
+   </nav>
+   <!-- Create task form modal -->
+
+   <!-- Tasks list and more -->
+   <main class="site-content">
+      <header class="site-content__header">
+         <div class="task-controls task-sort">
+            <h5 class="task-controls__heading">Sort by</h5>
+            <div class="task-controls__row">
+               <div class="task-controls__control-group">
+                  <label for="date-sort" class="task-controls__control-label">Date</label>
+                  <select 
+                     id="date-sort" 
+                     class="task-controls__control task-controls__control-select" 
+                     data-bind="options: dateSortSelectOptions,
+                                optionsText: 'label'"
+                  ></select>
+               </div>
+               <div class="task-controls__control-group">
+                  <label for="priority-sort" class="task-controls__control-label">Priority</label>
+                  <select 
+                     id="priority-sort" 
+                     class="task-controls__control task-controls__control-select"
+                     data-bind="options: prioritySortSelectOptions,
+                                optionsText: 'label'"
+                  ></select>
+               </div>
+               <div class="task-controls__control-group">
+                  <label for="title-sort" class="task-controls__control-label">Title</label>
+                  <select 
+                     id="title-sort" 
+                     class="task-controls__control task-controls__control-select"
+                     data-bind="options: titleSortSelectOptions,
+                                optionsText: 'label'"
+                  ></select>
+               </div>
+            </div>
+         </div>
+         <div class="task-controls task-filter">
+            <h5 class="task-controls__heading">Filter with</h5>
+            <div class="task-controls__row">
+               <div class="task-controls__control-group">
+                  <label for="priority-filter" class="task-controls__control-label">Priority</label>
+                  <select 
+                     id="priority-filter" 
+                     class="task-controls__control task-controls__control-select"
+                     data-bind="options: prioritySelectOptions,
+                                optionsText: 'label'"
+                  ></select>
+               </div>
+               <div class="task-controls__control-group">
+                  <label for="status-filter" class="task-controls__control-label">Status</label>
+                  <select 
+                     id="status-filter" 
+                     class="task-controls__control task-controls__control-select"
+                     data-bind="options: statusSelectOptions,
+                                optionsText: 'label'"
+                  ></select>
+               </div>
+            </div>
+         </div>
+      </header>
+      
+      <section class="site-content__body">
+         <div class="tasks-list">
+            <div class="tasks-list__body">
+               <div class="tasks-list__rows" data-bind="foreach: modifiedTasksList">
+                  <div class="task" data-bind="css: { 'task--done': isDone }">
+                     <div class="task__body">
+                        <div class="task__label-group">
+                           <span 
+                              class="task__label" 
+                              data-bind="text: priorityText,
+                                         css: {
+                                             'task__label--priority-high': isTaskPriorityHigh,
+                                             'task__label--priority-low': isTaskPriorityLow,
+                                         }"
+                           ></span>
+                           <span 
+                              class="task__label" 
+                              data-bind="text: status,
+                                         css: {
+                                             'task__label--status-new': isTaskNew,
+                                             'task__label--status-ongoing': isTaskInProgress,
+                                             'task__label--status-done': isDone,
+                                         }"
+                           ></span>
+                        </div>
+                        <div class="task__title" data-bind="text: title"></div>
+                        <div class="task__description" data-bind="text: description"></div>
+                        <div class="task__timestamp">
+                           <span class="task__timestamp-label">Created:</span>
+                           <span class="task__timestamp-value" data-bind="text: createdAtAsText"></span>
+                        </div>
+                        <!-- <div class="task__timestamp" data-bind="if: !!modifiedAt()">
+                           <span class="task__timestamp-label">Modified:</span>
+                           <span class="task__timestamp-value" data-bind="text: modifiedAtAsText"></span>
+                        </div> -->
+                        <div class="task__actions">
+                           <button class="task__action-menu-toggle" data-bind="click: $root.toggleTaskActionMenu">
+                              <i class="fa-solid fa-ellipsis-vertical icon"></i>
+                           </button>
+                           <ul class="task__action-menu" data-bind="css: { active: isTaskActionMenuOpen }">
+                              <li class="task__action-menu-item">
+                                 <button class="task__action-menu-button" data-bind="click: $root.editTask">
+                                    <i class="fa-regular fa-pen-to-square icon"></i>
+                                    Edit
+                                 </button>
+                              </li>
+                              <li class="task__action-menu-item">
+                                 <button class="task__action-menu-button" data-bind="click: $root.moveTaskToTrash">
+                                    <i class="fa-regular fa-trash-can icon"></i>
+                                    To Trash
+                                 </button>
+                              </li>
+                              <li class="task__action-menu-item">
+                                 <button class="task__action-menu-button" data-bind="click: $root.openConfirmationModal">
+                                    <i class="fa-regular fa-square-minus icon"></i>
+                                    Delete
+                                 </button>
+                              </li>
+                           </ul>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </section>
+   </main>
+
+   <!-- Add task modal opener button -->
+   <button class="btn--create-task-modal-opener" title="Click to open task create modal" data-bind="click: openAddTaskModal">
+      <i class="fa-solid fa-plus icon"></i>
+      Add task
+   </button>
+
+   <!-- Task create modal -->
+   <div class="modal task-edit-modal" data-bind="using: newTask, css: { active: addTaskModalVisible }">
+      <div class="modal__dialog">
+         <div class="modal__inner">
+            <div class="modal__header">
+               <h5 class="modal__heading">Add new task</h5>
+               <button class="modal__close-button" data-bind="click: $root.closeAddTaskModal">
+                  <i class="fa-solid fa-xmark icon"></i>
+               </button>
+            </div>
+            <div class="modal__body">
+               <form data-bind="submit: $root.addTask">
+                  <div class="form-group">
+                     <label for="task-title-edited" class="form-label">Title</label>
+                     <input id="task-title-edited" type="text" class="form-control" placeholder="Task title" data-bind="value: title">
+                  </div>
+                  <div class="form-group">
+                     <label for="task-description-edited" class="form-label">Description</label>
+                     <textarea id="task-description-edited" class="form-control" placeholder="Task description" rows="4" data-bind="value: description"></textarea>
+                  </div>                  
+                  <div class="form-group">
+                     <label for="task-priority-edited" class="form-label">Priority</label>
+                     <select 
+                        id="task-priority-edited" 
+                        class="form-control"
+                        data-bind="options: $root.prioritySelectOptions,
+                                   value: priority,
+                                   optionsText: 'label',
+                                   optionsValue: 'value'"
+                     ></select>
+                  </div>
+                  <div class="form-group">
+                     <input type="checkbox" id="has-deadline" data-bind="checked: hasDeadline">
+                     <label for="has-deadline" class="form-label">Set a deadline</label>
+                  </div>
+                  <div class="form-group" data-bind="style: { display: hasDeadline() ? 'block' : 'none' }">
+                     <label for="task-deadline" class="form-label">Deadline</label>
+                     <input type="date" id="task-deadline" class="form-control" data-bind="value: deadline">
+                  </div>
+                  <div class="form-btn-group">
+                     <button type="submit" class="btn btn--submit">Add</button>
+                     <button type="button" class="btn btn--cancel" data-bind="click: $root.closeAddTaskModal">Cancel</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Task edit modal -->
+   <div class="modal task-edit-modal" data-bind="with: taskToEdit, css: { active: editModalVisible }">
+      <div class="modal__dialog">
+         <div class="modal__inner">
+            <div class="modal__header">
+               <h5 class="modal__heading">Edit task</h5>
+               <button class="modal__close-button" data-bind="click: $root.closeEditModal">
+                  <i class="fa-solid fa-xmark icon"></i>
+               </button>
+            </div>
+            <div class="modal__body">
+               <form data-bind="submit: $root.onEditFormSubmit">
+                  <div class="form-group">
+                     <label for="task-title-edited" class="form-label">Title</label>
+                     <input id="task-title-edited" type="text" class="form-control" data-bind="value: title">
+                  </div>
+                  <div class="form-group">
+                     <label for="task-description-edited" class="form-label">Description</label>
+                     <textarea id="task-description-edited" class="form-control" rows="4" data-bind="value: description"></textarea>
+                  </div>
+                  <div class="form-row">
+                     <div class="form-group">
+                        <label for="task-status-edited" class="form-label">Status</label>
+                        <select 
+                           id="task-status-edited" 
+                           class="form-control"
+                           data-bind="options: $root.statusSelectOptions,
+                                      value: status,
+                                      optionsText: 'label',
+                                      optionsValue: 'value'"
+                        ></select>
+                     </div>
+
+                     <div class="form-group">
+                        <label for="task-priority-edited" class="form-label">Priority</label>
+                        <select 
+                           id="task-priority-edited" 
+                           class="form-control"
+                           data-bind="options: $root.prioritySelectOptions,
+                                      value: priority,
+                                      optionsText: 'label',
+                                      optionsValue: 'value'"
+                        ></select>
+                     </div>
+                  </div>
+                  <div class="form-btn-group">
+                     <button type="submit" class="btn btn--submit">Save</button>
+                     <button type="button" class="btn btn--cancel" data-bind="click: $root.closeEditModal">Cancel</button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Action confirmation modal -->
+   <div class="modal confirmation-modal" data-bind="css: { active: confirmationModalVisible }">
+      <div class="modal__dialog">
+         <div class="modal__inner">
+            <div class="modal__body">
+               <p class="confirmation-text">Are you sure about deleting the task?</p>
+               <div class="form-btn-group">
+                  <button type="button" class="btn btn--confirm">Confirm</button>
+                  <button type="button" class="btn btn--cancel" data-bind="click: closeConfirmationModal">Cancel</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   
+   <script src="js/main.js"></script>
+</body>
+</html>
