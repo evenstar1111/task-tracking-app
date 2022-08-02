@@ -16,20 +16,21 @@
    <header class="site-header">
       <div class="site-header-item-group">
          <button class="site-nav-toggle-button" data-bind="openSideNav: openSideNav">
-            <svg xmlns="http://www.w3.org/2000/svg" id="svg-menu-bar" class="svg-icon" viewBox="0 0 24 24" width="512" height="512">
-               <rect y="11" width="24" height="2" rx="1" />
-               <rect y="4" width="24" height="2" rx="1" />
-               <rect y="18" width="24" height="2" rx="1" />
-            </svg>
+            <i class="fa-solid fa-bars icon"></i>
          </button>
          <h1 class="site-title">Task Tracker</h1>
       </div>
-      <div class="site-header__search">
-         <input type="text" class="site-header__search-bar">
-         <!-- <svg xmlns="http://www.w3.org/2000/svg" id="svg-search" class="svg-icon site-header__search-icon" viewBox="0 0 24 24" width="512" height="512">
-            <path d="M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z" />
-         </svg> -->
-         <i class="fa-solid fa-magnifying-glass site-header__search-icon"></i>
+      <button class="site-header__search-toggle" data-bind="toggleSearchMobile: 's'">
+         <i class="fa-solid fa-magnifying-glass site-header__search-toggle__search-icon"></i>
+         <i class="fa-solid site-header__search-toggle__status-icon"></i>
+      </button>
+      <div class="site-header__search-wrapper mobile-search-js">
+         <div class="site-header__search-wrapper__inner">
+            <div class="site-header__search">
+               <input type="text" class="form-control site-header__search-bar" placeholder="Search tasks by title" data-bind="textInput: searchFilter">
+               <i class="fa-solid fa-magnifying-glass site-header__search-icon"></i>
+            </div>
+         </div>
       </div>
    </header>
 
@@ -71,7 +72,11 @@
                      id="date-sort" 
                      class="task-controls__control task-controls__control-select" 
                      data-bind="options: dateSortSelectOptions,
-                                optionsText: 'label'"
+                                value: dateSort,
+                                optionsText: 'label',
+                                optionsValue: 'value',
+                                optionsCaption: '--',
+                                event: { change: applyDateSort }"
                   ></select>
                </div>
                <div class="task-controls__control-group">
@@ -80,7 +85,11 @@
                      id="priority-sort" 
                      class="task-controls__control task-controls__control-select"
                      data-bind="options: prioritySortSelectOptions,
-                                optionsText: 'label'"
+                                value: prioritySort,
+                                optionsText: 'label',
+                                optionsValue: 'value',
+                                optionsCaption: '--',
+                                event: { change: applyPrioritySort }"
                   ></select>
                </div>
                <div class="task-controls__control-group">
@@ -89,7 +98,11 @@
                      id="title-sort" 
                      class="task-controls__control task-controls__control-select"
                      data-bind="options: titleSortSelectOptions,
-                                optionsText: 'label'"
+                                value: titleSort,
+                                optionsText: 'label',
+                                optionsValue: 'value',
+                                optionsCaption: '--',
+                                event: { change: applyTitleSort }"
                   ></select>
                </div>
             </div>
@@ -103,7 +116,10 @@
                      id="priority-filter" 
                      class="task-controls__control task-controls__control-select"
                      data-bind="options: prioritySelectOptions,
-                                optionsText: 'label'"
+                                value: priorityFilter,
+                                optionsText: 'label',
+                                optionsValue: 'value',
+                                optionsCaption: '--'"
                   ></select>
                </div>
                <div class="task-controls__control-group">
@@ -112,7 +128,10 @@
                      id="status-filter" 
                      class="task-controls__control task-controls__control-select"
                      data-bind="options: statusSelectOptions,
-                                optionsText: 'label'"
+                                value: statusFilter,
+                                optionsText: 'label',
+                                optionsValue: 'value',
+                                optionsCaption: '--'"
                   ></select>
                </div>
             </div>

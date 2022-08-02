@@ -63,7 +63,7 @@ ko.bindingHandlers.openSideNav = {
       element.addEventListener('click', function(event) {
          event.stopPropagation();
          openSideNav();
-      })
+      });
    }
 }
 
@@ -74,7 +74,7 @@ ko.bindingHandlers.controlSideNavVisibility = {
       
       window.addEventListener('click', function(event) {
          if (!isNavVisible() || event.target.closest('#' + element.id)) {
-            return console.log('nav status', isNavVisible(), event.target);
+            return;
          }
          isNavVisible(false);
       });
@@ -82,6 +82,13 @@ ko.bindingHandlers.controlSideNavVisibility = {
    update: function(element = document.createElement(null), valueAccessor) {
       var isNavVisible = valueAccessor();
       isNavVisible() ? element.classList.add('active') : element.classList.remove('active');
+   }
+}
+
+ko.bindingHandlers.toggleSearchMobile =  {
+   init: function(element = document.createElement(null), valueAccessor) {
+      var tel = document.querySelector('.mobile-search-js');
+      console.log(parseFloat(getComputedStyle(tel).animationDuration)*100);
    }
 }
 
@@ -182,6 +189,21 @@ function TasksViewModel() {
    self.editModalVisible = ko.observable(false);
    self.addTaskModalVisible = ko.observable(false);
    self.confirmationModalVisible = ko.observable(false);
+
+   self.applyTitleSort = function() {
+      self.prioritySort(null);
+      self.dateSort(null);
+   }
+
+   self.applyPrioritySort = function() {
+      self.dateSort(null);
+      self.titleSort(null);
+   }
+
+   self.applyDateSort = function() {
+      self.prioritySort(null);
+      self.titleSort(null);
+   }
 
    self.modifiedTasksList = ko.pureComputed(function() {
       var tasks = self.tasks().filter(function(task) {

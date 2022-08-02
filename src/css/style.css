@@ -75,36 +75,57 @@ FORM ELEMENTS
 /* =============
 site header
 =================*/
-.site-header,
-.site-header-item-group {
+.site-header {
    display: flex;
    align-items: center;
 }
 
 .site-header {
-   padding: 18px 25px;
+   position: sticky;
+   top: 0;
+   z-index: 9;
+   padding-right: 25px;
+   background-color: #fff;
    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .site-header-item-group {
+   display: flex;
+   align-items: stretch;
    margin-right: auto;
 }
 
 .site-nav-toggle-button {
-   width: 25px;
-   height: 25px;
-   margin-right: 25px;
-   background-color: #0000;
+   width: 65px;
+   margin-right: 20px;
+   padding-top: 4px;
+   background-color: #fff;
    cursor: pointer;
+   text-align: center;
+   transition: all 220ms linear;
+}
+
+.site-nav-toggle-button:hover,
+.site-nav-toggle-button:active {
+   background-color: #3c8aff3b;
+}
+
+.site-nav-toggle-button .icon {
+   font-size: 20px;
+}
+
+.site-nav-toggle-button:hover .icon,
+.site-nav-toggle-button:active .icon {
+   color: #3c8aff;
 }
 
 .site-title {
+   padding: 25px 0;
    font-size: 20px;
    line-height: 1;
    font-weight: 500;
 }
 
-.site-nav-toggle-button .svg-icon,
 .site-nav__menu-button .svg-icon {
    -o-object-fit: contain;
    object-fit: contain;
@@ -112,16 +133,10 @@ site header
    user-select: none;
 }
 
-.site-nav-toggle-button .svg-icon {
-   width: 100%;
-   height: 100%;
-}
-
 .site-header__search {
    position: relative;
    z-index: 1;
    width: 300px;
-   /* overflow: hidden; */
 }
 
 .site-header__search-bar,
@@ -129,29 +144,27 @@ site header
    transition: all 220ms linear;
 }
 
-.site-header__search-bar {
-   width: 100%;
-   height: 32px;
-   border: 1px solid var(--form-control-border-color);
-   border-radius: 5px;
+.site-header__search .site-header__search-bar {
+   height: 40px;
    padding-left: 37px;
    background-color: #0000;
+   font-size: 15px;
 }
 
 .site-header__search-icon {
    position: absolute;
-   left: 10px;
+   left: 12px;
    top: 50%;
    transform: translateY(-50%);
    z-index: -1;
-   width: 16px;
+   font-size: 15px;
    height: auto;
    fill: var(--form-control-border-color);
 }
 
 .site-header__search-bar:hover~.site-header__search-icon,
 .site-header__search-bar:focus~.site-header__search-icon {
-   fill: #3c8aff;
+   color: #3c8aff;
 }
 
 /* ===============
@@ -162,7 +175,7 @@ site nav
    top: 0;
    bottom: 0;
    left: -310px;
-   z-index: 9;
+   z-index: 99;
    width: 310px;
    background-color: #fff;
    transition: left 250ms ease-in-out;
@@ -264,8 +277,9 @@ Tasks area
 =================== */
 .tasks-list__rows {
    display: grid;
+   gap: 16px;
+   align-items: flex-start;
    padding: 15px;
-   /* background-color: rgb(73, 141, 243); */
 }
 
 .task {
@@ -349,11 +363,11 @@ Tasks area
    top: 0;
 }
 
-button.task__action-menu-toggle {
+.task__action-menu-toggle {
    padding: 0 5px;
 }
 
-button.task__action-menu-toggle .icon {
+.task__action-menu-toggle .icon {
    font-size: 19px;
    color: #4338f1;
 }
@@ -532,25 +546,51 @@ Add task button
    position: fixed;
    bottom: 40px;
    right: 40px;
-   padding: 0.4em 1em;
-   border-radius: 100px;
-   background: #cb37c7;
+   align-items: center;
+   appearance: none;
+   background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+   border: none;
+   border-radius: 6px;
+   box-shadow: rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, rgba(58, 65, 111, .5) 0 -3px 0 inset;
+   box-sizing: border-box;
    color: #fff;
-   text-align: center;
-   font-size: 20px;
-   text-transform: capitalize;
-   box-shadow: 1px 2px 7px #520450a8;
-   transition: all 220ms linear;
+   cursor: pointer;
+   display: inline-flex;
+   height: 48px;
+   justify-content: center;
+   line-height: 1;
+   overflow: hidden;
+   padding-left: 16px;
+   padding-right: 16px;
+   text-align: left;
+   text-decoration: none;
+   transition: box-shadow .15s, transform .15s;
+   user-select: none;
+   -webkit-user-select: none;
+   touch-action: manipulation;
+   white-space: nowrap;
+   will-change: box-shadow, transform;
+   font-size: 18px;
 }
-.btn--create-task-modal-opener:hover,
+
+.btn--create-task-modal-opener:focus {
+   box-shadow: #3c4fe0 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+}
+
+.btn--create-task-modal-opener:hover {
+   box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, #3c4fe0 0 -3px 0 inset;
+   transform: translateY(-2px);
+}
+
 .btn--create-task-modal-opener:active {
-   background: #971d93;
-   box-shadow: 1px 2px 17px #52045096;
+   box-shadow: #3c4fe0 0 3px 7px inset;
+   transform: translateY(2px);
 }
+
 .btn--create-task-modal-opener .icon {
    color: #fff;
-   font-size: 19px;
-    margin-right: 6px;
+   font-size: 17px;
+   margin-right: 6px;
 }
 
 /* =====================
@@ -566,16 +606,85 @@ Media queries
       padding: 25px 35px 30px;
    }
 }
+
 @media (min-width: 992px) {
    .tasks-list__rows {
       grid-template-columns: repeat(3, 1fr);
    }
 }
+
 @media (min-width: 1326px) {
    .tasks-list__rows {
       grid-template-columns: repeat(4, 1fr);
    }
 }
+
+@media (max-width: 575.91px) {
+   .site-header {
+      flex-wrap: wrap;
+      align-items: stretch;
+      padding-right: 0;
+   }
+
+   .site-header__search-toggle {
+      --icon-color: #686868;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      column-gap: 7px;
+      padding: 0 2em;
+      transition: all 220ms linear;
+   }
+
+   .site-header__search-toggle:hover,
+   .site-header__search-toggle:active,
+   .site-header__search-toggle.search-shown {
+      --icon-color: #3c8aff;
+      background-color: #3c8aff3b;
+   }
+
+   .site-header__search-toggle__search-icon,
+   .site-header__search-toggle__status-icon {
+      color: var(--icon-color);
+   }
+
+   .site-header__search-toggle__search-icon {
+      font-size: 18px;
+   }
+
+   .site-header__search-toggle__status-icon {
+      font-size: 14px;
+   }
+
+   .site-header__search-toggle__status-icon::before {
+      content: "\f107";
+   }
+
+   .site-header__search-toggle.search-shown .site-header__search-toggle__status-icon::before {
+      content: "\f106";
+   }
+
+   .site-header__search-wrapper,
+   .site-header__search-wrapper__inner {
+      transition: all 270ms;
+   }
+
+   .site-header__search-wrapper {
+      width: 100%;
+      position: relative;
+      height: 83px;
+   }
+
+   .site-header__search-wrapper__inner {
+      padding: 1.5em 0;
+      display: flex;
+      justify-content: center;
+      position: absolute;
+      top: 0;
+      right: 0;
+   }
+}
+
 @media (max-width: 767.91px) {
    .site-content__header {
       padding-bottom: 10px;
