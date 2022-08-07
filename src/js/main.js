@@ -1,194 +1,69 @@
 'use strict';
 
-const TASK_STATUS = {
-   new: 'new',
-   inProgress: 'in-progress',
-   done: 'done',
-}
-const TASK_PRIORITY = {
-   low: 1,
-   normal: 2,
-   high: 3
-}
-const PRIORITY_SORT_OPTIONS = {
-   lowest: 'lowest',
-   highest: 'highest',
-}
-const TITLE_SORT_OPTIONS = {
-   asc: 'asc',
-   desc: 'desc',
-}
-const DATE_SORT_OPTIONS = {
-   oldest: 'oldest',
-   newest: 'newest',
-}
-const priorityOptionsArray = Object.keys(TASK_PRIORITY).map(function(key) {
-   return {
-      label: key.toUpperCase(),
-      value: TASK_PRIORITY[key],
-   };
-});
-const statusOptionsArray = Object.keys(TASK_STATUS).map(function(key) {
-   return { 
-      label: key.toUpperCase(), 
-      value: TASK_STATUS[key] 
-   };
-});
-const prioritySortOptionsArray = Object.keys(PRIORITY_SORT_OPTIONS).map(function(key) {
-   return { 
-      label: key.toUpperCase() + ' FIRST', 
-      value: PRIORITY_SORT_OPTIONS[key],
-   };
-});
-const titleSortOptionsArray = Object.keys(TITLE_SORT_OPTIONS).map(function(key) {
-   return { 
-      label: TITLE_SORT_OPTIONS[key] === TITLE_SORT_OPTIONS.asc ? 'A-Z' : 'Z-A',
-      value: TITLE_SORT_OPTIONS[key],
-   };
-});
-const dateSortOptionsArray = Object.keys(DATE_SORT_OPTIONS).map(function(key) {
-   return { 
-      label: key.toUpperCase() + ' FIRST', 
-      value: DATE_SORT_OPTIONS[key],
-   };
-});
+import helpers from './modules/helpers.js';
+import constants from './modules/constants.js';
+import Task from './modules/task-constructor.js';
+import { 
+   CONTROL_SIDE_NAV_VISIBILITY, 
+   OPEN_SIDE_NAV, 
+   TOGGLE_SEARCH_MOBILE 
+} from './modules/ko-custom-binding.js';
+
 
 /* =======================
 * Custom binding handlers
 ========================== */
-ko.bindingHandlers.openSideNav = {
-   init: function(element = document.createElement(null), valueAccessor) {
-      var openSideNav = valueAccessor();
+ko.bindingHandlers.openSideNav = OPEN_SIDE_NAV;
 
-      element.addEventListener('click', function(event) {
-         event.stopPropagation();
-         openSideNav();
-      });
-   }
-}
+ko.bindingHandlers.controlSideNavVisibility = CONTROL_SIDE_NAV_VISIBILITY;
 
-ko.bindingHandlers.controlSideNavVisibility = {
-   init: function(element = document.createElement(null), valueAccessor) {
-      var isNavVisible = valueAccessor();
-      isNavVisible() ? element.classList.add('active') : element.classList.remove('active');
-      
-      window.addEventListener('click', function(event) {
-         if (!isNavVisible() || event.target.closest('#' + element.id)) {
-            return;
-         }
-         isNavVisible(false);
-      });
-   },
-   update: function(element = document.createElement(null), valueAccessor) {
-      var isNavVisible = valueAccessor();
-      isNavVisible() ? element.classList.add('active') : element.classList.remove('active');
-   }
-}
+ko.bindingHandlers.toggleSearchMobile =  TOGGLE_SEARCH_MOBILE;
 
-ko.bindingHandlers.toggleSearchMobile =  {
-   init: function(element = document.createElement(null), valueAccessor) {
-      var tel = document.querySelector('.mobile-search-js');
-      console.log(parseFloat(getComputedStyle(tel).animationDuration)*100);
-   }
-}
-
-function Task(data) {
-   var self = this;
-   self._id = data._id || generateRandomId();
-   self.title = ko.observable(data.title || '');
-   self.description = ko.observable(data.description || '');
-   self.status = ko.observable(data.status || TASK_STATUS.new);
-   self.priority = ko.observable(data.priority || TASK_PRIORITY.normal);
-   self.hasDeadline = ko.observable(data.hasDeadline || false);
-   self.deadline = ko.observable(data.deadline || null);
-   self.createdAt = ko.observable(data.createdAt || new Date().toISOString());
-   self.modifiedAt = ko.observable(data.modifiedAt || null);
-   self.isInTrash = ko.observable(data.isInTrash || false);
-   
-   self.isTaskActionMenuOpen = ko.observable(false);
-   
-   /* computed observable properties */   
-   self.priorityText = ko.computed(function() {
-      let matchedItem = priorityOptionsArray.find(item => item.value === self.priority());
-      return matchedItem ? matchedItem.label : '';
-   });
-   
-   self.deadlineAsText = ko.computed(function() {
-      if (self.deadline() == null) {
-         return '';
-      }
-      return new Date(self.deadline()).toDateString();
-   });
-   
-   self.createdAtAsText = ko.computed(function() {
-      return new Date(self.createdAt()).toDateString();
-   });
-   
-   self.modifiedAtAsText = ko.computed(function() {
-      if (self.modifiedAt() == null) {
-         return '';
-      }
-      return new Date(self.modifiedAt()).toDateString();
-   });
-   
-   self.isTaskPriorityHigh = ko.pureComputed(function() {
-      return self.priority() === TASK_PRIORITY.high;
-   });
-   
-   self.isTaskPriorityLow = ko.pureComputed(function() {
-      return self.priority() === TASK_PRIORITY.low;
-   });
-   
-   self.isTaskNew = ko.pureComputed(function() {
-      return self.status() === TASK_STATUS.new;
-   });
-   
-   self.isTaskInProgress = ko.pureComputed(function() {
-      return self.status() === TASK_STATUS.inProgress;
-   });
-
-   self.isDone = ko.pureComputed(function() {
-      return self.status() === TASK_STATUS.done;
-   });
-}
 /* TODO: need to think about behavior of message showing */
-
-/* ===============
-* helper functions
-================ */
-function dateEpochCompareOfTasks(a, b) {
-   return Date.parse(b.createdAt()) - Date.parse(a.createdAt());
-}
-
-function generateRandomId() {
-   return Math.random().toString(36).substring(2);
-}
 
 /* ===============
 * ViewModel
 ================ */
 function TasksViewModel() {
    var self = this;
+   
+   self.views = {
+      task: 'TASKS',
+      trash: 'TRASH'
+   }
+   self.activeView = ko.observable(self.views.task);
 
-   self.prioritySelectOptions = priorityOptionsArray.slice();
-   self.statusSelectOptions = statusOptionsArray.slice();
-   self.prioritySortSelectOptions = prioritySortOptionsArray.slice();
-   self.titleSortSelectOptions = titleSortOptionsArray.slice();
-   self.dateSortSelectOptions = dateSortOptionsArray.slice();
+   self.prioritySelectOptions = constants.PRIORITY_OPTIONS_ARRAY.slice();
+   self.statusSelectOptions = constants.STATUS_OPTIONS_ARRAY.slice();
+   self.prioritySortSelectOptions = constants.PRIORITY_SORT_OPTIONS_ARRAY.slice();
+   self.titleSortSelectOptions = constants.TITLE_SORT_OPTIONS_ARRAY.slice();
+   self.dateSortSelectOptions = constants.DATE_SORT_OPTIONS_ARRAY.slice();
 
    self.tasks = ko.observableArray([]);
    self.newTask = ko.observable(new Task({}));
    self.taskToEdit = ko.observable(null);
+   self.taskToView = ko.observable(null);
    self.priorityFilter = ko.observable();
    self.statusFilter = ko.observable();
    self.searchFilter = ko.observable('');
    self.prioritySort = ko.observable();
    self.titleSort = ko.observable();
-   self.dateSort = ko.observable(DATE_SORT_OPTIONS.newest);
+   self.dateSort = ko.observable(constants.DATE_SORT_OPTIONS.newest);
    self.isSideNavVisible = ko.observable(false);
    self.editModalVisible = ko.observable(false);
    self.addTaskModalVisible = ko.observable(false);
+   self.viewTaskModalVisible = ko.observable(false);
    self.confirmationModalVisible = ko.observable(false);
+   self.isMobileSearchBarVisible = ko.observable(false);
+   self.isMobileSearchBarAnimating = ko.observable(false);
+
+   self.goToTasksView = function() {
+      self.activeView(self.views.task);
+   }
+
+   self.goToTrashView = function() {
+      self.activeView(self.views.trash);
+   }
 
    self.applyTitleSort = function() {
       self.prioritySort(null);
@@ -235,12 +110,12 @@ function TasksViewModel() {
       * SORTING
       ============ */
       if (self.prioritySort()) {
-         if (self.prioritySort() === PRIORITY_SORT_OPTIONS.lowest) {
+         if (self.prioritySort() === constants.PRIORITY_SORT_OPTIONS.lowest) {
             tasks.sort(function(a, b) {
                return a.priority() - b.priority();
             });
          }
-         if (self.prioritySort() === PRIORITY_SORT_OPTIONS.highest) {
+         if (self.prioritySort() === constants.PRIORITY_SORT_OPTIONS.highest) {
             tasks.sort(function(a, b) {
                return b.priority() - a.priority();
             });
@@ -248,12 +123,12 @@ function TasksViewModel() {
       }
 
       if (self.titleSort()) {
-         if (self.titleSort() === TITLE_SORT_OPTIONS.asc) {
+         if (self.titleSort() === constants.TITLE_SORT_OPTIONS.asc) {
             tasks.sort(function(a, b) {
                return a.title().toLowerCase().localeCompare(b.title().toLowerCase());
             });
          }
-         if (self.titleSort() === TITLE_SORT_OPTIONS.desc) {
+         if (self.titleSort() === constants.TITLE_SORT_OPTIONS.desc) {
             tasks.sort(function(a, b) {
                return b.title().toLowerCase().localeCompare(a.title().toLowerCase());
             });
@@ -261,15 +136,21 @@ function TasksViewModel() {
       }
 
       if (self.dateSort()) {
-         if (self.dateSort() === DATE_SORT_OPTIONS.oldest) {
-            tasks.sort(dateEpochCompareOfTasks).reverse();
+         if (self.dateSort() === constants.DATE_SORT_OPTIONS.oldest) {
+            tasks.sort(helpers.dateEpochCompareOfTasks).reverse();
          }
-         if (self.dateSort() === DATE_SORT_OPTIONS.newest) {
-            tasks.sort(dateEpochCompareOfTasks);
+         if (self.dateSort() === constants.DATE_SORT_OPTIONS.newest) {
+            tasks.sort(helpers.dateEpochCompareOfTasks);
          }
       }
 
       return tasks;
+   });
+
+   self.tasksInTrash = ko.pureComputed(function() {
+      return self.tasks().filter(function(task) {
+         return task.isInTrash();
+      });
    });
 
    self.addTask = function() {
@@ -299,6 +180,16 @@ function TasksViewModel() {
       self.newTask(new Task({}));
    }
 
+   self.viewTaskDetails = function(task) {
+      self.taskToView( task );
+      self.viewTaskModalVisible(true);
+   }
+
+   self.closeTaskDetails = function() {
+      self.viewTaskModalVisible(false);
+      self.taskToView(null);
+   }
+
    self.moveTaskToTrash = function(task) {
       task.isInTrash(true);
       self.saveTasksToStorage();
@@ -306,6 +197,7 @@ function TasksViewModel() {
 
    self.restoreTaskFromTrash = function(task) {
       task.isInTrash(false);
+      self.saveTasksToStorage();
    }
 
    self.restoreAllTasksFromTrash = function() {
@@ -343,6 +235,7 @@ function TasksViewModel() {
       targetTask.description( self.taskToEdit().description() );
       targetTask.priority( self.taskToEdit().priority() );
       targetTask.status( self.taskToEdit().status() );
+      targetTask.modifiedAt( new Date().toISOString() );
 
       self.saveTasksToStorage();
 
@@ -373,6 +266,22 @@ function TasksViewModel() {
       task.isTaskActionMenuOpen(!task.isTaskActionMenuOpen());
    }
 
+   self.onAdditionOfTask = function(domNode=document.querySelector('div')) {
+      if (!domNode.classList) {
+         return;
+      }
+      /* domNode.style.transitionDuration = '800ms';
+      domNode.style.transitionProperty = 'background-color'; */
+      domNode.style.transition = 'background-color 2800ms ease';
+      domNode.style.backgroundColor = '#fec';
+
+      requestAnimationFrame(function() {
+         requestAnimationFrame(function() {
+            domNode.style.backgroundColor = '#fff';
+         });
+      })
+   }
+
    /*=============================================
    * Saving and loading tasks using local storage.
    ==============================================*/
@@ -385,7 +294,7 @@ function TasksViewModel() {
       var observableTasks;
       if (tasks && tasks.length) {
          observableTasks = tasks.map(task => new Task(task));
-         self.tasks(observableTasks.sort(dateEpochCompareOfTasks));
+         self.tasks(observableTasks.sort(helpers.dateEpochCompareOfTasks));
       }
    }
    

@@ -167,6 +167,10 @@ site header
    color: #3c8aff;
 }
 
+.site-header__search-toggle {
+   display: none;
+}
+
 /* ===============
 site nav
 ================= */
@@ -228,7 +232,8 @@ task controls area
    border-bottom: 1px solid #ddd;
 }
 
-.task-controls__heading {
+.task-controls__heading,
+.trash-view-title {
    font-size: 20px;
    font-weight: 600;
    margin-bottom: 10px;
@@ -275,10 +280,21 @@ task controls area
 /* =================
 Tasks area
 =================== */
+.trash-view-title {
+   padding: 15px 0 15px 15px;
+   border-bottom: 1px solid #78909c;
+}
+.trash-empty-message {
+   padding: 60px 0 15px;
+   font-size: 30px;
+   text-align: center;
+   font-weight: 500;
+   color: #a5a5a5;
+}
 .tasks-list__rows {
    display: grid;
    gap: 16px;
-   align-items: flex-start;
+   align-items: stretch;
    padding: 15px;
 }
 
@@ -293,8 +309,20 @@ Tasks area
    background: #ecf7f1;
 }
 
+.task--in-progress {
+   background: #ff9f291f;
+}
+
+.task--in-trash {
+   background: #78909c26;
+}
+
 .task__body {
    position: relative;
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+   height: 100%;
 }
 
 .task__title {
@@ -351,10 +379,15 @@ Tasks area
    margin-bottom: 1.3em;
 }
 
-.task__timestamp {
+.task__timestamp,
+.task__label-type {
    --font-size-base: 12px;
    --font-weight-base: 500;
    --color-primary-text: #919191;
+}
+
+.task__timestamp--deadline .task__timestamp-value {
+   --color-primary-text: #890502;
 }
 
 .task__actions {
@@ -654,14 +687,16 @@ Media queries
 
    .site-header__search-toggle__status-icon {
       font-size: 14px;
+      transform-origin: center;
+      transition: transform 250ms linear;
+   }
+   
+   .mobile-search-shown .site-header__search-toggle__status-icon {
+      transform: rotate(180deg);
    }
 
    .site-header__search-toggle__status-icon::before {
       content: "\f107";
-   }
-
-   .site-header__search-toggle.search-shown .site-header__search-toggle__status-icon::before {
-      content: "\f106";
    }
 
    .site-header__search-wrapper,
@@ -670,8 +705,14 @@ Media queries
    }
 
    .site-header__search-wrapper {
-      width: 100%;
       position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 0;
+      transition: height 350ms ease-out;
+   }
+
+   .site-header__search-wrapper.visible {
       height: 83px;
    }
 
@@ -681,7 +722,14 @@ Media queries
       justify-content: center;
       position: absolute;
       top: 0;
-      right: 0;
+      right: -30%;
+      opacity: 0;
+   }
+   
+   .site-header__search-wrapper.visible .site-header__search-wrapper__inner {
+      right: 50%;
+      transform: translateX(50%);
+      opacity: 1;
    }
 }
 

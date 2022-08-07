@@ -7,24 +7,24 @@
    <title>Task tracking app</title>
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
    <link rel="stylesheet" href="./css/style.css">
-   <script src="../libs/knockout/knockout.debug.js"></script>
+   <script src="../libs/knockout/knockout.min.js"></script>
    <script src="../libs/knockout/knockout.mapping.min.js"></script>
 </head>
 <body>
 
    <!-- header -->
-   <header class="site-header">
+   <header class="site-header" data-bind="css: { 'mobile-search-shown': isMobileSearchBarVisible }">
       <div class="site-header-item-group">
          <button class="site-nav-toggle-button" data-bind="openSideNav: openSideNav">
             <i class="fa-solid fa-bars icon"></i>
          </button>
          <h1 class="site-title">Task Tracker</h1>
       </div>
-      <button class="site-header__search-toggle" data-bind="toggleSearchMobile: 's'">
+      <button class="site-header__search-toggle" data-bind="toggleSearchMobile: { visible: isMobileSearchBarVisible, animating: isMobileSearchBarAnimating, searchBarSelector: '.mobile-search-js' }">
          <i class="fa-solid fa-magnifying-glass site-header__search-toggle__search-icon"></i>
          <i class="fa-solid site-header__search-toggle__status-icon"></i>
       </button>
-      <div class="site-header__search-wrapper mobile-search-js">
+      <div class="site-header__search-wrapper mobile-search-js" data-bind="css: { visible: isMobileSearchBarVisible, animating: isMobileSearchBarAnimating }">
          <div class="site-header__search-wrapper__inner">
             <div class="site-header__search">
                <input type="text" class="form-control site-header__search-bar" placeholder="Search tasks by title" data-bind="textInput: searchFilter">
@@ -37,7 +37,7 @@
    <nav class="site-nav" id="site-side-nav" data-bind="controlSideNavVisibility: isSideNavVisible">
       <ul class="site-nav__menu">
          <li class="site-nav__menu-item">
-            <button class="site-nav__menu-button active">
+            <button class="site-nav__menu-button" data-bind="click: goToTasksView, css: { active: activeView() === views.task }">
                <svg id="svg-check-list" class="svg-icon" height="512" viewBox="0 0 24 24" width="512" xmlns="http://www.w3.org/2000/svg" data-name="svg-check-list">
                   <path d="m4 6a2.982 2.982 0 0 1 -2.122-.879l-1.585-1.585 1.414-1.414 1.586 1.585a1.023 1.023 0 0 0 1.414 0l3.586-3.585 1.414 1.414-3.586 3.585a2.978 2.978 0 0 1 -2.121.879zm20-3h-12v2h12zm-17.879 10.121 3.586-3.585-1.414-1.414-3.586 3.585a1.023 1.023 0 0 1 -1.414 0l-1.586-1.585-1.414 1.414 1.585 1.585a3 3 0 0 0 4.243 0zm17.879-2.121h-12v2h12zm-17.879 10.121 3.586-3.585-1.414-1.414-3.586 3.585a1.023 1.023 0 0 1 -1.414 0l-1.586-1.585-1.414 1.414 1.585 1.585a3 3 0 0 0 4.243 0zm17.879-2.121h-12v2h12z" />
                </svg>
@@ -45,7 +45,7 @@
             </button>
          </li>
          <li class="site-nav__menu-item">
-            <button class="site-nav__menu-button">
+            <button class="site-nav__menu-button" data-bind="click: goToTrashView, css: { active: activeView() === views.trash }">
                <svg xmlns="http://www.w3.org/2000/svg" class="svg-icon" viewBox="0 0 24 24" width="512" height="512">
                   <g id="_01_align_center" data-name="01 align center">
                      <path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" />
@@ -60,6 +60,7 @@
    </nav>
    <!-- Create task form modal -->
 
+   <!--ko if: activeView() === views.task-->
    <!-- Tasks list and more -->
    <main class="site-content">
       <header class="site-content__header">
@@ -141,43 +142,55 @@
       <section class="site-content__body">
          <div class="tasks-list">
             <div class="tasks-list__body">
-               <div class="tasks-list__rows" data-bind="foreach: modifiedTasksList">
-                  <div class="task" data-bind="css: { 'task--done': isDone }">
+               <div class="tasks-list__rows" data-bind="foreach: { data: modifiedTasksList, afterAdd: onAdditionOfTask }">
+                  <div class="task" data-bind="css: { 'task--done': isDone, 'task--in-progress': isTaskInProgress }">
                      <div class="task__body">
-                        <div class="task__label-group">
-                           <span 
-                              class="task__label" 
-                              data-bind="text: priorityText,
-                                         css: {
-                                             'task__label--priority-high': isTaskPriorityHigh,
-                                             'task__label--priority-low': isTaskPriorityLow,
-                                         }"
-                           ></span>
-                           <span 
-                              class="task__label" 
-                              data-bind="text: status,
-                                         css: {
-                                             'task__label--status-new': isTaskNew,
-                                             'task__label--status-ongoing': isTaskInProgress,
-                                             'task__label--status-done': isDone,
-                                         }"
-                           ></span>
+                        <div>
+                           <div class="task__label-group">
+                              <span 
+                                 class="task__label" 
+                                 data-bind="text: priorityText,
+                                          css: {
+                                                'task__label--priority-high': isTaskPriorityHigh,
+                                                'task__label--priority-low': isTaskPriorityLow,
+                                          }"
+                              ></span>
+                              <span 
+                                 class="task__label" 
+                                 data-bind="text: status,
+                                          css: {
+                                                'task__label--status-new': isTaskNew,
+                                                'task__label--status-ongoing': isTaskInProgress,
+                                                'task__label--status-done': isDone,
+                                          }"
+                              ></span>
+                           </div>
+                           <div class="task__title" data-bind="text: title"></div>
+                           <div class="task__description" data-bind="text: briefDescription"></div>
                         </div>
-                        <div class="task__title" data-bind="text: title"></div>
-                        <div class="task__description" data-bind="text: description"></div>
-                        <div class="task__timestamp">
-                           <span class="task__timestamp-label">Created:</span>
-                           <span class="task__timestamp-value" data-bind="text: createdAtAsText"></span>
+                        <div class="task__timestamp-group">
+                           <div class="task__timestamp">
+                              <span class="task__timestamp-label">Created:</span>
+                              <span class="task__timestamp-value" data-bind="text: createdAtAsText"></span>
+                           </div>
+                           <!--ko if: hasDeadline-->
+                           <div class="task__timestamp task__timestamp--deadline">
+                              <span class="task__timestamp-label">Deadline:</span>
+                              <span class="task__timestamp-value" data-bind="text: deadlineAsText"></span>
+                           </div>
+                           <!--/ko-->
                         </div>
-                        <!-- <div class="task__timestamp" data-bind="if: !!modifiedAt()">
-                           <span class="task__timestamp-label">Modified:</span>
-                           <span class="task__timestamp-value" data-bind="text: modifiedAtAsText"></span>
-                        </div> -->
                         <div class="task__actions">
                            <button class="task__action-menu-toggle" data-bind="click: $root.toggleTaskActionMenu">
                               <i class="fa-solid fa-ellipsis-vertical icon"></i>
                            </button>
                            <ul class="task__action-menu" data-bind="css: { active: isTaskActionMenuOpen }">
+                              <li class="task__action-menu-item">
+                                 <button class="task__action-menu-button" data-bind="click: $root.viewTaskDetails">
+                                    <i class="fa-solid fa-circle-info icon"></i>
+                                    view
+                                 </button>
+                              </li>
                               <li class="task__action-menu-item">
                                  <button class="task__action-menu-button" data-bind="click: $root.editTask">
                                     <i class="fa-regular fa-pen-to-square icon"></i>
@@ -316,6 +329,127 @@
       </div>
    </div>
 
+   <div class="modal" data-bind="css: { active: viewTaskModalVisible }">
+      <div class="modal__dialog">
+         <div class="modal__inner">
+            <div class="modal__header">
+               <h5 class="modal__heading">Task details</h5>
+               <button class="modal__close-button" data-bind="click: closeTaskDetails">
+                  <i class="fa-solid fa-xmark icon"></i>
+               </button>
+            </div>
+            <div class="modal__body">
+               <div class="task__body" data-bind="with: taskToView">
+                  <div>
+                     <div class="task__title" data-bind="text: title"></div>
+                     <div class="task__description" data-bind="text: description"></div>
+                     <div class="task__label-group">
+                        <span class="task__label-type">
+                           priority:
+                        </span>
+                        <span 
+                           class="task__label" 
+                           data-bind="text: priorityText,
+                                    css: {
+                                          'task__label--priority-high': isTaskPriorityHigh,
+                                          'task__label--priority-low': isTaskPriorityLow,
+                                    }"
+                        ></span>
+                        <span class="task__label-type">
+                           status:
+                        </span>
+                        <span 
+                           class="task__label" 
+                           data-bind="text: status,
+                                    css: {
+                                          'task__label--status-new': isTaskNew,
+                                          'task__label--status-ongoing': isTaskInProgress,
+                                          'task__label--status-done': isDone,
+                                    }"
+                        ></span>
+                     </div>
+                  </div>
+                  <div class="task__timestamp-group">
+                     <div class="task__timestamp">
+                        <span class="task__timestamp-label">Created:</span>
+                        <span class="task__timestamp-value" data-bind="text: createdAtAsText"></span>
+                     </div>
+                     <!--ko if: !!modifiedAt()-->
+                     <div class="task__timestamp">
+                        <span class="task__timestamp-label">Modified:</span>
+                        <span class="task__timestamp-value" data-bind="text: modifiedAtAsText"></span>
+                     </div>
+                     <!--/ko-->
+                     <!--ko if: hasDeadline-->
+                     <div class="task__timestamp task__timestamp--deadline">
+                        <span class="task__timestamp-label">Deadline:</span>
+                        <span class="task__timestamp-value" data-bind="text: deadlineAsText"></span>
+                     </div>
+                     <!--/ko-->
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!--/ko-->
+
+   <!--ko if: activeView() === views.trash-->
+      <!--ko if: !!tasksInTrash().length-->
+      <h1 class="trash-view-title">Trash</h1>
+      <div class="tasks-list">
+         <div class="tasks-list__body">
+            <div class="tasks-list__rows" data-bind="foreach: tasksInTrash">
+               <div class="task task--in-trash">
+                  <div class="task__body">
+                     <div>
+                        <div class="task__label-group">
+                           <span class="task__label" data-bind="text: priorityText"></span>
+                           <span class="task__label" data-bind="text: status"></span>
+                        </div>
+                        <div class="task__title" data-bind="text: title"></div>
+                        <div class="task__description" data-bind="text: briefDescription"></div>
+                     </div>
+                     <div class="task__timestamp">
+                        <span class="task__timestamp-label">Created:</span>
+                        <span class="task__timestamp-value" data-bind="text: createdAtAsText"></span>
+                     </div>
+                     <!-- <div class="task__timestamp" data-bind="if: !!modifiedAt()">
+                        <span class="task__timestamp-label">Modified:</span>
+                        <span class="task__timestamp-value" data-bind="text: modifiedAtAsText"></span>
+                     </div> -->
+                     <div class="task__actions">
+                        <button class="task__action-menu-toggle" data-bind="click: $root.toggleTaskActionMenu">
+                           <i class="fa-solid fa-ellipsis-vertical icon"></i>
+                        </button>
+                        <ul class="task__action-menu" data-bind="css: { active: isTaskActionMenuOpen }">
+                           <li class="task__action-menu-item">
+                              <button class="task__action-menu-button" data-bind="click: $root.restoreTaskFromTrash">
+                                 <i class="fa-solid fa-trash-can-arrow-up icon"></i>
+                                 Restore
+                              </button>
+                           </li>
+                           <li class="task__action-menu-item">
+                              <button class="task__action-menu-button" data-bind="click: $root.openConfirmationModal">
+                                 <i class="fa-regular fa-square-minus icon"></i>
+                                 Delete
+                              </button>
+                           </li>
+                        </ul>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!--/ko-->
+
+      <!--ko if: !tasksInTrash().length-->
+      <h2 class="trash-empty-message">The trash can is empty.</h2>
+      <!--/ko-->
+   <!--/ko-->
+
+   
    <!-- Action confirmation modal -->
    <div class="modal confirmation-modal" data-bind="css: { active: confirmationModalVisible }">
       <div class="modal__dialog">
@@ -331,6 +465,6 @@
       </div>
    </div>
    
-   <script src="js/main.js"></script>
+   <script type="module" src="js/main.js"></script>
 </body>
 </html>
